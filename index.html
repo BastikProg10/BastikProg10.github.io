@@ -2,106 +2,143 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Рулетка 🎰</title>
+  <title>Дикая Рулетка 🎰</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
-      text-align: center;
-      font-family: sans-serif;
-      background: #111;
-      color: white;
-      padding-top: 50px;
+      margin: 0;
+      padding: 0;
+      background: #0d0d0d;
+      font-family: 'Montserrat', sans-serif;
+      color: #ffd700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding-top: 60px;
     }
 
     h1 {
-      color: #0f0;
+      font-size: 36px;
+      text-shadow: 0 0 10px #ffd700aa;
     }
 
     .wheel {
-      margin: 20px auto;
+      margin-top: 30px;
       width: 300px;
-      height: 50px;
+      height: 60px;
       overflow: hidden;
-      border: 4px solid #0f0;
-      border-radius: 10px;
-      background: #222;
-      position: relative;
+      border: 4px solid #ffd700;
+      border-radius: 12px;
+      background: #1a1a1a;
+      box-shadow: 0 0 15px #ffd70055;
     }
 
     .items {
       display: flex;
-      width: max-content;
-      transition: transform 4s cubic-bezier(0.2, 0.6, 0, 1);
+      transition: transform 8s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
     .item {
       width: 100px;
-      height: 50px;
-      line-height: 50px;
-      background: #333;
-      border: 1px solid #444;
-      color: #0f0;
-      font-weight: bold;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      font-size: 26px;
+      background: #111;
+      border-left: 1px solid #333;
+      border-right: 1px solid #333;
+      box-shadow: inset 0 0 5px #000;
     }
 
     .spin-btn {
-      padding: 10px 25px;
-      background: #0f0;
-      color: black;
-      border: none;
+      margin-top: 25px;
+      padding: 12px 30px;
+      background: #ffd700;
+      color: #111;
       font-size: 18px;
-      cursor: pointer;
-      margin-top: 20px;
+      font-weight: bold;
+      border: none;
       border-radius: 8px;
-      transition: background 0.3s;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ffd700aa;
+      transition: background 0.3s, transform 0.2s;
     }
 
     .spin-btn:hover {
-      background: #0c0;
+      background: #ffcc00;
+      transform: scale(1.05);
     }
 
     .result {
-      margin-top: 20px;
-      font-size: 20px;
-      color: #0f0;
+      margin-top: 30px;
+      font-size: 22px;
+      text-shadow: 0 0 5px #ffd70088;
     }
   </style>
 </head>
 <body>
 
-  <h1>🎰 Рулетка</h1>
+  <h1>🎰 Дикая Рулетка</h1>
 
-  <div class="wheel" id="wheel">
-    <div class="items" id="items">
-      <div class="item">💎</div>
-      <div class="item">🍒</div>
-      <div class="item">🍀</div>
-      <div class="item">🔥</div>
-      <div class="item">💰</div>
-      <div class="item">👑</div>
-      <div class="item">💣</div>
-    </div>
+  <div class="wheel">
+    <div class="items" id="items"></div>
   </div>
 
-  <button class="spin-btn" onclick="spin()">Крутить!</button>
+  <button class="spin-btn" onclick="spin()">КРУТИТЬ!</button>
   <div class="result" id="result"></div>
 
   <script>
-    const items = document.getElementById('items');
+    const itemsContainer = document.getElementById('items');
     const result = document.getElementById('result');
-    const symbols = ['💎', '🍒', '🍀', '🔥', '💰', '👑', '💣'];
+
+    const allSymbols = ['💎', '🍒', '🍀', '🔥', '💰', '👑', '💣', '🎲', '🎯', '🧲', '🛎️', '⚡', '🍕', '🎁', '🚀', '🐱', '🐶', '🦄', '🍄', '🥇', '🥈', '🥉', '🎖️', '🎃', '🧠', '👻', '🪙', '🧨', '🦾', '🎵', '🎸', '🏆', '⚔️', '🛡️', '🧊', '🍭', '🪅', '🌀', '💊', '🧪', '🛸', '📦', '📯', '🚨', '🔮', '🪄', '🧷', '⏳', '🔋', '🪙'];
+
+    let spinCount = 0;
+
+    function createItemsRow() {
+      itemsContainer.innerHTML = '';
+      const visibleItems = [];
+
+      // создаём длинный ряд символов
+      for (let i = 0; i < 100; i++) {
+        const randomSymbol = allSymbols[Math.floor(Math.random() * allSymbols.length)];
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.textContent = randomSymbol;
+        itemsContainer.appendChild(div);
+        visibleItems.push(randomSymbol);
+      }
+
+      return visibleItems;
+    }
 
     function spin() {
-      const index = Math.floor(Math.random() * symbols.length);
-      const offset = -index * 100;
-      items.style.transition = 'transform 4s cubic-bezier(0.2, 0.6, 0, 1)';
-      items.style.transform = `translateX(${offset}px)`;
+      const symbolsRow = createItemsRow();
 
-      result.textContent = 'Крутим...';
+      const targetIndex = Math.floor(Math.random() * 90) + 5; // не на краю
+      const offset = -targetIndex * 100;
+      spinCount++;
+
+      itemsContainer.style.transition = 'none';
+      itemsContainer.style.transform = 'translateX(0px)';
+      void itemsContainer.offsetWidth; // force reflow
 
       setTimeout(() => {
-        result.textContent = `Выпало: ${symbols[index]}`;
-      }, 4000);
+        itemsContainer.style.transition = 'transform 8s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        itemsContainer.style.transform = `translateX(${offset}px)`;
+
+        result.textContent = 'Крутим... 🎲';
+
+        setTimeout(() => {
+          result.textContent = `🎉 Выпало: ${symbolsRow[targetIndex]}`;
+        }, 8000);
+      }, 50);
     }
+
+    // инициализация
+    createItemsRow();
   </script>
 
 </body>
