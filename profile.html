@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Профиль</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -28,55 +27,19 @@
 <body>
 
   <div class="title">Профиль</div>
-  <div class="line" id="id">Загрузка ID...</div>
-  <div class="line" id="balance">Загрузка баланса...</div>
-  <div class="line" id="ref-link">Загрузка ссылки...</div>
-  <div class="line" id="invited">Загрузка приглашённых...</div>
-  <div class="line" id="inviter">Загрузка пригласившего...</div>
-  <div class="line" id="reg-date">Загрузка даты регистрации...</div>
 
-  <script>
-    Telegram.WebApp.ready();
-    const user = Telegram.WebApp.initDataUnsafe?.user;
-
-    if (!user?.id) {
-      document.body.innerHTML = '<p class="error">Ошибка: не удалось получить ваш Telegram ID</p>';
-    } else {
-      fetch(`http://localhost:3000/get-profile?user_id=${user.id}`)
-        .then(res => res.json())
-        .then(data => {
-          try {
-            document.getElementById('id').textContent =
-              `Ваш айди: ${data.id ?? '❌ Ошибка получения ID'}`;
-
-            document.getElementById('balance').textContent =
-              `Баланс: ${data.balance != null ? data.balance + ' 🪙' : '❌ Ошибка'}`;
-
-            document.getElementById('ref-link').textContent =
-              data.id
-                ? `Ваша реферальная ссылка: https://t.me/MifixDropBot/app?startapp=${data.id}`
-                : '❌ Не удалось сформировать ссылку';
-
-            document.getElementById('invited').textContent =
-              `Вы привели: ${data.invited_count != null ? data.invited_count + ' чел' : '❌ Ошибка'}`;
-
-            document.getElementById('inviter').textContent =
-              `Вас привел: ${data.inviter || '❌ Не указано'}`;
-
-            document.getElementById('reg-date').textContent =
-              data.registered_at
-                ? `Регистрация: ${new Date(data.registered_at).toLocaleString()}`
-                : '❌ Дата не указана';
-          } catch (e) {
-            console.error('Ошибка обработки данных:', e);
-          }
-        })
-        .catch(err => {
-          console.error('Ошибка запроса:', err);
-          document.getElementById('id').innerHTML = '<span class="error">Ошибка загрузки данных</span>';
-        });
-    }
-  </script>
+  <div class="line">Ваш айди: {{ user_id or '<span class="error">Ошибка</span>' }}</div>
+  <div class="line">Баланс: {{ balance + ' 🪙' if balance is not none else '<span class="error">Ошибка</span>' }}</div>
+  <div class="line">Ваша реферальная ссылка: 
+    {% if user_id %}
+      https://t.me/MifixDropBot/app?startapp={{ user_id }}
+    {% else %}
+      <span class="error">Ошибка</span>
+    {% endif %}
+  </div>
+  <div class="line">Вы привели: {{ invited_count if invited_count is not none else '<span class="error">Ошибка</span>' }} чел</div>
+  <div class="line">Вас привел: {{ inviter if inviter else '<span class="error">Не указано</span>' }}</div>
+  <div class="line">Регистрация: {{ registered_at if registered_at else '<span class="error">Неизвестно</span>' }}</div>
 
 </body>
 </html>
