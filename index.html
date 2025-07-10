@@ -99,18 +99,18 @@
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.expand(); // расширим Mini App
+    tg.expand();
 
     const itemsContainer = document.getElementById('items');
     const result = document.getElementById('result');
 
     const allSymbols = ['💎', '🍒', '🍀', '🔥', '💰', '👑', '💣', '🎲', '🎯', '🧲', '🛎️', '⚡', '🍕', '🎁', '🚀', '🐱', '🐶', '🦄', '🍄', '🥇', '🥈', '🥉', '🎖️', '🎃', '🧠', '👻', '🪙', '🧨', '🦾', '🎵', '🎸', '🏆', '⚔️', '🛡️', '🧊', '🍭', '🪅', '🌀', '💊', '🧪', '🛸', '📦', '📯', '🚨', '🔮', '🪄', '🧷', '⏳', '🔋'];
 
-    function createItemsRow() {
+    function createItemsRow(amount = 150) {
       itemsContainer.innerHTML = '';
       const visibleItems = [];
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < amount; i++) {
         const randomSymbol = allSymbols[Math.floor(Math.random() * allSymbols.length)];
         const div = document.createElement('div');
         div.className = 'item';
@@ -123,8 +123,8 @@
     }
 
     function spin() {
-      const symbolsRow = createItemsRow();
-      const targetIndex = 48;
+      const symbolsRow = createItemsRow(200);
+      const targetIndex = 100 + Math.floor(Math.random() * 30); // Рандомная середина
       const offset = -(targetIndex * 100 - 90);
 
       itemsContainer.style.transition = 'none';
