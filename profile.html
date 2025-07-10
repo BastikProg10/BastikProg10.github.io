@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Профиль</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #000;
+      color: #FFD700;
+      font-family: 'Montserrat', sans-serif;
+      padding: 20px;
+    }
+    .line {
+      margin-bottom: 10px;
+    }
+    .title {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">Профиль</div>
+  <div class="line" id="id"></div>
+  <div class="line" id="balance"></div>
+  <div class="line" id="ref-link"></div>
+  <div class="line" id="invited"></div>
+  <div class="line" id="inviter"></div>
+  <div class="line" id="reg-date"></div>
+
+  <script>
+    Telegram.WebApp.ready();
+    const user = Telegram.WebApp.initDataUnsafe?.user;
+
+    fetch(`http://localhost:3000/get-profile?user_id=${user.id}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('id').textContent = `Ваш айди: ${data.id}`;
+        document.getElementById('balance').textContent = `Баланс: ${data.balance} 🪙`;
+        document.getElementById('ref-link').textContent = `Ваша реферальная ссылка: https://t.me/MifixDropBot/app?startapp=${data.id}`;
+        document.getElementById('invited').textContent = `Вы привели: ${data.invited_count} чел`;
+        document.getElementById('inviter').textContent = `Вас привел: ${data.inviter || 'Не указано'}`;
+        document.getElementById('reg-date').textContent = `Регистрация: ${new Date(data.registered_at).toLocaleString()}`;
+      })
+      .catch(err => {
+        console.error(err);
+        document.body.innerHTML = '<p style="color:red;">Ошибка загрузки профиля</p>';
+      });
+  </script>
+
+</body>
+</html>
