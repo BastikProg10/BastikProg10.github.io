@@ -19,36 +19,63 @@
       font-size: 22px;
       margin-bottom: 20px;
     }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
   <div class="title">Профиль</div>
-  <div class="line" id="id"></div>
-  <div class="line" id="balance"></div>
-  <div class="line" id="ref-link"></div>
-  <div class="line" id="invited"></div>
-  <div class="line" id="inviter"></div>
-  <div class="line" id="reg-date"></div>
+  <div class="line" id="id">Загрузка ID...</div>
+  <div class="line" id="balance">Загрузка баланса...</div>
+  <div class="line" id="ref-link">Загрузка ссылки...</div>
+  <div class="line" id="invited">Загрузка приглашённых...</div>
+  <div class="line" id="inviter">Загрузка пригласившего...</div>
+  <div class="line" id="reg-date">Загрузка даты регистрации...</div>
 
   <script>
     Telegram.WebApp.ready();
     const user = Telegram.WebApp.initDataUnsafe?.user;
 
-    fetch(`http://localhost:3000/get-profile?user_id=${user.id}`)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('id').textContent = `Ваш айди: ${data.id}`;
-        document.getElementById('balance').textContent = `Баланс: ${data.balance} 🪙`;
-        document.getElementById('ref-link').textContent = `Ваша реферальная ссылка: https://t.me/MifixDropBot/app?startapp=${data.id}`;
-        document.getElementById('invited').textContent = `Вы привели: ${data.invited_count} чел`;
-        document.getElementById('inviter').textContent = `Вас привел: ${data.inviter || 'Не указано'}`;
-        document.getElementById('reg-date').textContent = `Регистрация: ${new Date(data.registered_at).toLocaleString()}`;
-      })
-      .catch(err => {
-        console.error(err);
-        document.body.innerHTML = '<p style="color:red;">Ошибка загрузки профиля</p>';
-      });
+    if (!user?.id) {
+      document.body.innerHTML = '<p class="error">Ошибка: не удалось получить ваш Telegram ID</p>';
+    } else {
+      fetch(`http://localhost:3000/get-profile?user_id=${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          try {
+            document.getElementById('id').textContent =
+              `Ваш айди: ${data.id ?? '❌ Ошибка получения ID'}`;
+
+            document.getElementById('balance').textContent =
+              `Баланс: ${data.balance != null ? data.balance + ' 🪙' : '❌ Ошибка'}`;
+
+            document.getElementById('ref-link').textContent =
+              data.id
+                ? `Ваша реферальная ссылка: https://t.me/MifixDropBot/app?startapp=${data.id}`
+                : '❌ Не удалось сформировать ссылку';
+
+            document.getElementById('invited').textContent =
+              `Вы привели: ${data.invited_count != null ? data.invited_count + ' чел' : '❌ Ошибка'}`;
+
+            document.getElementById('inviter').textContent =
+              `Вас привел: ${data.inviter || '❌ Не указано'}`;
+
+            document.getElementById('reg-date').textContent =
+              data.registered_at
+                ? `Регистрация: ${new Date(data.registered_at).toLocaleString()}`
+                : '❌ Дата не указана';
+          } catch (e) {
+            console.error('Ошибка обработки данных:', e);
+          }
+        })
+        .catch(err => {
+          console.error('Ошибка запроса:', err);
+          document.getElementById('id').innerHTML = '<span class="error">Ошибка загрузки данных</span>';
+        });
+    }
   </script>
 
 </body>
