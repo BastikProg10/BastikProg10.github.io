@@ -63,6 +63,32 @@ app.post('/register', (req, res) => {
   });
 });
 
+
+
+
+// Получение профиля
+app.get('/get-profile', (req, res) => {
+  const user_id = req.query.user_id;
+
+  if (!user_id) return res.status(400).json({ error: 'user_id обязателен' });
+
+  db.get(`SELECT * FROM users WHERE user_id = ?`, [user_id], (err, user) => {
+    if (err || !user) return res.status(404).json({ error: 'Пользователь не найден' });
+
+    // Считаем, сколько людей он пригласил
+    db.get(`SELECT COUNT(*) as invited_count FROM users WHERE inviter_id = ?`, [user_id], (err, countRow) => {
+      res.json({
+        id: user.user_id,
+        balance: user.balance,
+        inviter: user.inviter_id || null,
+        registered_at: user.registered_at,
+        invited_count: countRow.invited_count,
+        username: user.username
+      });
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
 });
