@@ -1,94 +1,145 @@
-const express = require('express');
-const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
 const path = require('path');
 
-const app = express();
 const PORT = 3000;
+const DATA_FILE = './links.json';
 
-app.use(cors());
-app.use(express.json());
+// Читаем JSON из файла или создаём пустой
+function readData() {
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, '{}');
+  }
+  const raw = fs.readFileSync(DATA_FILE);
+  return JSON.parse(raw);
+}
 
-// Подключение к базе данных
-const db = new sqlite3.Database(path.join(__dirname, 'db.sqlite'), (err) => {
-  if (err) console.error('❌ Ошибка базы:', err);
-  else console.log('✅ База данных подключена');
-});
+// Записываем JSON в файл
+function writeData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
 
-// Создание таблицы при первом запуске
-db.run(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT UNIQUE,
-    username TEXT,
-    inviter_id TEXT,
-    balance INTEGER DEFAULT 0,
-    registered_at TEXT
-  )
-`);
+// Простая генерация кода (8 символов, буквы+цифры)
+function generateCode() {
+  return Math.random().toString(36).substring(2, 10);
+}
 
-// Роут для регистрации
-app.post('/register', (req, res) => {
-  const { user_id, username, inviter_id } = req.body;
+// Отдаём статические файлы из папки public
+function serveStaticFile(req, res) {
+  let filePath = '.' + req.url;
+  if (filePath === './') filePath = './public/index.html';
 
-  if (!user_id) return res.status(400).json({ error: 'user_id обязателен' });
+  const extname = String(path.extname(filePath)).toLowerCase();
+  const mimeTypes = {
+    '.html': 'text/html',
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+  };
 
-  db.get(`SELECT * FROM users WHERE user_id = ?`, [user_id], (err, row) => {
-    if (row) {
-      return res.json({ message: 'Пользователь уже зарегистрирован', user: row });
+  const contentType = mimeTypes[extname] || 'application/octet-stream';
+
+  fs.readFile(filePath, function(error, content) {
+    if (error) {
+      res.writeHead(404);
+      res.end('Not found');
+    } else {
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(content, 'utf-8');
+    }
+  });
+}
+
+const server = http.createServer((req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+
+  // API для создания био-ссылки
+  if (req.method === 'POST' && parsedUrl.pathname === '/createBio') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const { text, color } = JSON.parse(body);
+        if (!text || !color) {
+          res.writeHead(400);
+          return res.end('Missing fields');
+        }
+
+        const data = readData();
+        const uid = generateCode();
+        data[uid] = { text, color };
+        writeData(data);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ uid }));
+      } catch {
+        res.writeHead(400);
+        return res.end('Invalid JSON');
+      }
+    });
+  }
+
+  // Страница био по коду: /startapp?startapp=код
+  else if (req.method === 'GET' && parsedUrl.pathname === '/startapp') {
+    const uid = parsedUrl.query.startapp;
+    if (!uid) {
+      res.writeHead(400);
+      return res.end('Code required');
+    }
+    const data = readData();
+    const bio = data[uid];
+    if (!bio) {
+      res.writeHead(404);
+      return res.end('Bio not found');
     }
 
-    const registered_at = new Date().toISOString();
-
-    db.run(`
-      INSERT INTO users (user_id, username, inviter_id, balance, registered_at)
-      VALUES (?, ?, ?, ?, ?)
-    `, [user_id, username || '', inviter_id || '', 0, registered_at], function (err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Ошибка при добавлении' });
-      }
-
-      res.json({
-        message: 'Пользователь зарегистрирован',
-        user: {
-          user_id,
-          username,
-          inviter_id,
-          balance: 0,
-          registered_at
+    // Отдаём простую HTML с био
+    const html = `
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Bio Link</title>
+      <style>
+        body {
+          background-color: ${bio.color};
+          color: #fff;
+          font-family: Arial, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
         }
-      });
-    });
-  });
+        .container {
+          background: rgba(0,0,0,0.4);
+          padding: 30px;
+          border-radius: 10px;
+          font-size: 24px;
+          text-align: center;
+          max-width: 400px;
+          word-wrap: break-word;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        ${bio.text}
+      </div>
+    </body>
+    </html>
+    `;
+
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    return res.end(html);
+  }
+
+  // Отдаём статику из /public
+  else {
+    serveStaticFile(req, res);
+  }
 });
 
-
-
-
-// Получение профиля
-app.get('/get-profile', (req, res) => {
-  const user_id = req.query.user_id;
-
-  if (!user_id) return res.status(400).json({ error: 'user_id обязателен' });
-
-  db.get(`SELECT * FROM users WHERE user_id = ?`, [user_id], (err, user) => {
-    if (err || !user) return res.status(404).json({ error: 'Пользователь не найден' });
-
-    // Считаем, сколько людей он пригласил
-    db.get(`SELECT COUNT(*) as invited_count FROM users WHERE inviter_id = ?`, [user_id], (err, countRow) => {
-      res.json({
-        id: user.user_id,
-        balance: user.balance,
-        inviter: user.inviter_id || null,
-        registered_at: user.registered_at,
-        invited_count: countRow.invited_count,
-        username: user.username
-      });
-    });
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
