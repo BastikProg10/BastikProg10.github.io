@@ -1,175 +1,107 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>ку</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Создать био-ссылку</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      padding: 0;
       background: #000;
       color: #FFD700;
       font-family: 'Montserrat', sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
     }
-
-    .loader {
-      position: fixed;
-      top: 0;
-      left: 0;
+    label, select, input, button {
+      font-size: 18px;
+      margin-top: 10px;
+      display: block;
       width: 100%;
-      height: 100%;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
     }
-
-    .main {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      flex-direction: column;
-      display: none;
-    }
-
-    .coin {
-      width: 130px;
-      height: 130px;
-      background: url('https://i.imgur.com/FoEtG5b.png') no-repeat center/cover;
-    }
-
-    .info-text {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .bottom-bar {
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      font-size: 12px;
-      background: #111;
-      border-top: 2px solid #FFD700;
-    }
-
-    .bottom-bar a {
-      text-decoration: none;
+    select, input {
+      padding: 8px;
+      margin-top: 5px;
+      background: #222;
+      border: none;
       color: #FFD700;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      background: #FFD700;
+      border: none;
+      color: #000;
       font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s;
     }
-
-    .bottom-bar img {
-      width: 28px;
-      height: 28px;
-      margin-bottom: 5px;
+    button:hover {
+      background: #e6c200;
     }
-
-    a:hover {
-      color: #ffc400;
+    .result {
+      margin-top: 30px;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
 
-  <!-- Загрузка -->
-  <div class="loader" id="loader">
-    <img src="https://i.gifer.com/YCZH.gif" alt="Загрузка..." width="100">
-  </div>
+  <h1>Создать био-ссылку</h1>
 
-  <!-- Основной экран -->
-  <div class="main" id="main">
-    <div class="coin"></div>
-    <div class="info-text" id="userInfo">
-      Загрузка данных...
-    </div>
-  </div>
+  <label for="text">Введите название (текст):</label>
+  <input type="text" id="text" placeholder="Например, Мой создатель" />
 
-  <!-- Нижнее меню -->
-  <div class="bottom-bar">
-    <a id="shopBtn">
-      <img src="https://i.imgur.com/3cNRG7E.png" alt="Магазин">
-      Магазин
-    </a>
-    <a id="profileBtn">
-      <img src="https://i.imgur.com/98gEwZ8.png" alt="Профиль">
-      Профиль
-    </a>
-    <a id="bonusBtn">
-      <img src="https://i.imgur.com/MdfWYjF.png" alt="Бонус">
-      Бонус
-    </a>
-    <a id="tasksBtn">
-      <img src="https://i.imgur.com/yRSfbmn.png" alt="Задания">
-      Задания
-    </a>
-    <a id="wheelBtn">
-      <img src="https://i.imgur.com/vjVX3KY.png" alt="Удача">
-      Удача
-    </a>
-  </div>
+  <label for="color">Выберите цвет фона:</label>
+  <select id="color">
+    <option value="#FFA500">🟠 Оранжевый</option>
+    <option value="#FFFF00">🟡 Желтый</option>
+    <option value="#008000">🟢 Зеленый</option>
+    <option value="#8B4513">🟤 Коричневый</option>
+    <option value="#800080">🟣 Фиолетовый</option>
+    <option value="#000000">⚫ Черный</option>
+    <option value="#0000FF">🔵 Синий</option>
+    <option value="#FF0000">🔴 Красный</option>
+    <option value="#FFFFFF">⚪ Белый</option>
+  </select>
+
+  <button id="createBtn">Создать!</button>
+
+  <div class="result" id="result"></div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    const initData = tg.initDataUnsafe;
-    const user_id = initData.user?.id;
-    const username = initData.user?.username || 'не указано';
-    const inviter_id = tg.initData.match(/startapp=(\d+)/)?.[1] || null;
+    const createBtn = document.getElementById('createBtn');
+    const result = document.getElementById('result');
 
-    const defaultBalance = 0;
+    createBtn.onclick = async () => {
+      const text = document.getElementById('text').value.trim();
+      const color = document.getElementById('color').value;
 
-    setTimeout(() => {
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('main').style.display = 'flex';
+      if (!text) {
+        alert('Введите текст');
+        return;
+      }
 
-      // Показываем инфу
-      document.getElementById('userInfo').innerHTML = `
-        Ваш баланс: ${defaultBalance} <br>
-        Ваш Telegram ID: ${user_id}
-      `;
-
-      // Обновляем ссылки с user_id
-      document.getElementById('shopBtn').href = `/shop?user_id=${user_id}`;
-      document.getElementById('profileBtn').href = `/profile?user_id=${user_id}`;
-      document.getElementById('bonusBtn').href = `/bonus?user_id=${user_id}`;
-      document.getElementById('tasksBtn').href = `/tasks?user_id=${user_id}`;
-      document.getElementById('wheelBtn').href = `/wheel?user_id=${user_id}`;
-
-      // Отправляем данные на сервер
-      fetch('http://localhost:3000/register', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          user_id,
-          username,
-          inviter_id
-        })
-      }).then(res => res.json())
-        .then(data => {
-          console.log('Пользователь зарегистрирован:', data);
-        }).catch(err => {
-          console.error('Ошибка регистрации:', err);
+      try {
+        const res = await fetch('/createBio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, color })
         });
 
-    }, 3000);
+        if (!res.ok) {
+          throw new Error('Ошибка создания био-ссылки');
+        }
+
+        const data = await res.json();
+
+        const link = `http://t.me/MifixDropBot/startapp?startapp=${data.uid}`;
+        result.innerHTML = `Ссылка создана!<br><a href="${link}" target="_blank">${link}</a>`;
+      } catch (e) {
+        alert(e.message);
+      }
+    };
   </script>
 
 </body>
