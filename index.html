@@ -2,37 +2,50 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Дикая Рулетка 🎰</title>
+  <title>🎰 Рулетка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      padding: 0;
+      padding: 20px 10px;
       background: #0d0d0d;
       font-family: 'Montserrat', sans-serif;
       color: #ffd700;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
-      padding-top: 60px;
+      box-sizing: border-box;
     }
 
     h1 {
-      font-size: 36px;
-      text-shadow: 0 0 10px #ffd700aa;
+      font-size: 24px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .roulette-container {
+      position: relative;
+      margin: 20px 0;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 26px;
     }
 
     .wheel {
-      margin-top: 30px;
-      width: 300px;
+      width: 280px;
       height: 60px;
       overflow: hidden;
-      border: 4px solid #ffd700;
+      border: 3px solid #ffd700;
       border-radius: 12px;
       background: #1a1a1a;
-      box-shadow: 0 0 15px #ffd70055;
     }
 
     .items {
@@ -45,63 +58,58 @@
       height: 60px;
       line-height: 60px;
       text-align: center;
-      font-size: 26px;
+      font-size: 24px;
       background: #111;
       border-left: 1px solid #333;
       border-right: 1px solid #333;
-      box-shadow: inset 0 0 5px #000;
     }
 
     .spin-btn {
-      margin-top: 25px;
-      padding: 12px 30px;
+      margin-top: 20px;
+      padding: 10px 25px;
       background: #ffd700;
       color: #111;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      box-shadow: 0 0 15px #ffd700aa;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    .spin-btn:hover {
-      background: #ffcc00;
-      transform: scale(1.05);
     }
 
     .result {
-      margin-top: 30px;
-      font-size: 22px;
-      text-shadow: 0 0 5px #ffd70088;
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <h1>🎰 Дикая Рулетка</h1>
+  <h1>🎰 Рулетка</h1>
 
-  <div class="wheel">
-    <div class="items" id="items"></div>
+  <div class="roulette-container">
+    <div class="pointer">▼</div>
+    <div class="wheel">
+      <div class="items" id="items"></div>
+    </div>
   </div>
 
-  <button class="spin-btn" onclick="spin()">КРУТИТЬ!</button>
+  <button class="spin-btn" onclick="spin()">Крутить!</button>
   <div class="result" id="result"></div>
 
   <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // расширим Mini App
+
     const itemsContainer = document.getElementById('items');
     const result = document.getElementById('result');
 
-    const allSymbols = ['💎', '🍒', '🍀', '🔥', '💰', '👑', '💣', '🎲', '🎯', '🧲', '🛎️', '⚡', '🍕', '🎁', '🚀', '🐱', '🐶', '🦄', '🍄', '🥇', '🥈', '🥉', '🎖️', '🎃', '🧠', '👻', '🪙', '🧨', '🦾', '🎵', '🎸', '🏆', '⚔️', '🛡️', '🧊', '🍭', '🪅', '🌀', '💊', '🧪', '🛸', '📦', '📯', '🚨', '🔮', '🪄', '🧷', '⏳', '🔋', '🪙'];
-
-    let spinCount = 0;
+    const allSymbols = ['💎', '🍒', '🍀', '🔥', '💰', '👑', '💣', '🎲', '🎯', '🧲', '🛎️', '⚡', '🍕', '🎁', '🚀', '🐱', '🐶', '🦄', '🍄', '🥇', '🥈', '🥉', '🎖️', '🎃', '🧠', '👻', '🪙', '🧨', '🦾', '🎵', '🎸', '🏆', '⚔️', '🛡️', '🧊', '🍭', '🪅', '🌀', '💊', '🧪', '🛸', '📦', '📯', '🚨', '🔮', '🪄', '🧷', '⏳', '🔋'];
 
     function createItemsRow() {
       itemsContainer.innerHTML = '';
       const visibleItems = [];
 
-      // создаём длинный ряд символов
       for (let i = 0; i < 100; i++) {
         const randomSymbol = allSymbols[Math.floor(Math.random() * allSymbols.length)];
         const div = document.createElement('div');
@@ -116,14 +124,12 @@
 
     function spin() {
       const symbolsRow = createItemsRow();
-
-      const targetIndex = Math.floor(Math.random() * 90) + 5; // не на краю
-      const offset = -targetIndex * 100;
-      spinCount++;
+      const targetIndex = 48;
+      const offset = -(targetIndex * 100 - 90);
 
       itemsContainer.style.transition = 'none';
       itemsContainer.style.transform = 'translateX(0px)';
-      void itemsContainer.offsetWidth; // force reflow
+      void itemsContainer.offsetWidth;
 
       setTimeout(() => {
         itemsContainer.style.transition = 'transform 8s cubic-bezier(0.25, 0.8, 0.25, 1)';
@@ -132,12 +138,11 @@
         result.textContent = 'Крутим... 🎲';
 
         setTimeout(() => {
-          result.textContent = `🎉 Выпало: ${symbolsRow[targetIndex]}`;
+          result.textContent = `Выпало: ${symbolsRow[targetIndex]}`;
         }, 8000);
       }, 50);
     }
 
-    // инициализация
     createItemsRow();
   </script>
 
