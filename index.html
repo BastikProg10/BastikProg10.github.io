@@ -103,24 +103,25 @@
     </div>
   </div>
 
+  <!-- Нижнее меню -->
   <div class="bottom-bar">
-    <a href="/shop">
+    <a id="shopBtn">
       <img src="https://i.imgur.com/3cNRG7E.png" alt="Магазин">
       Магазин
     </a>
-    <a href="/profile">
+    <a id="profileBtn">
       <img src="https://i.imgur.com/98gEwZ8.png" alt="Профиль">
       Профиль
     </a>
-    <a href="/bonus">
+    <a id="bonusBtn">
       <img src="https://i.imgur.com/MdfWYjF.png" alt="Бонус">
       Бонус
     </a>
-    <a href="/tasks">
+    <a id="tasksBtn">
       <img src="https://i.imgur.com/yRSfbmn.png" alt="Задания">
       Задания
     </a>
-    <a href="/wheel">
+    <a id="wheelBtn">
       <img src="https://i.imgur.com/vjVX3KY.png" alt="Удача">
       Удача
     </a>
@@ -141,9 +142,16 @@
 
       // Показываем инфу
       document.getElementById('userInfo').innerHTML = `
-        Ваш баланс: ${defaultBalance} 🪙<br>
+        Ваш баланс: ${defaultBalance} <br>
         Ваш Telegram ID: ${user_id}
       `;
+
+      // Обновляем ссылки с user_id
+      document.getElementById('shopBtn').href = `/shop?user_id=${user_id}`;
+      document.getElementById('profileBtn').href = `/profile?user_id=${user_id}`;
+      document.getElementById('bonusBtn').href = `/bonus?user_id=${user_id}`;
+      document.getElementById('tasksBtn').href = `/tasks?user_id=${user_id}`;
+      document.getElementById('wheelBtn').href = `/wheel?user_id=${user_id}`;
 
       // Отправляем данные на сервер
       fetch('http://localhost:3000/register', {
