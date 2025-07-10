@@ -28,34 +28,31 @@
 
   <div class="title">Профиль</div>
 
-  <div class="line">
-    Ваш айди: {{ user_id or '<span class="error">Ошибка</span>' }}
-  </div>
+  <div class="line" id="user_id"></div>
+  <div class="line" id="balance"></div>
+  <div class="line" id="ref_link"></div>
+  <div class="line" id="invited_count"></div>
+  <div class="line" id="inviter"></div>
+  <div class="line" id="registered_at"></div>
 
-  <div class="line">
-    Баланс: {{ (balance ~ ' 🪙') if balance is not none else '<span class="error">Ошибка</span>' }}
-  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
 
-  <div class="line">
-    Ваша реферальная ссылка:
-    {% if user_id %}
-      https://t.me/MifixDropBot/app?startapp={{ user_id }}
-    {% else %}
-      <span class="error">Ошибка</span>
-    {% endif %}
-  </div>
+    const user_id = params.get("user_id");
+    const balance = params.get("balance");
+    const invited_count = params.get("invited_count");
+    const inviter = params.get("inviter");
+    const registered_at = params.get("registered_at");
 
-  <div class="line">
-    Вы привели: {{ invited_count if invited_count is not none else '<span class="error">Ошибка</span>' }} чел
-  </div>
-
-  <div class="line">
-    Вас привел: {{ inviter if inviter else '<span class="error">Не указано</span>' }}
-  </div>
-
-  <div class="line">
-    Регистрация: {{ registered_at if registered_at else '<span class="error">Неизвестно</span>' }}
-  </div>
+    document.getElementById("user_id").innerHTML = `Ваш айди: ${user_id || '<span class="error">Ошибка</span>'}`;
+    document.getElementById("balance").innerHTML = `Баланс: ${balance !== null ? balance: '<span class="error">Ошибка</span>'}`;
+    document.getElementById("ref_link").innerHTML = user_id
+      ? `Ваша реферальная ссылка: https://t.me/MifixDropBot/app?startapp=${user_id}`
+      : `Ваша реферальная ссылка: <span class="error">Ошибка</span>`;
+    document.getElementById("invited_count").innerHTML = `Вы привели: ${invited_count || '<span class="error">Ошибка</span>'} чел`;
+    document.getElementById("inviter").innerHTML = `Вас привел: ${inviter || '<span class="error">Не указано</span>'}`;
+    document.getElementById("registered_at").innerHTML = `Регистрация: ${registered_at || '<span class="error">Неизвестно</span>'}`;
+  </script>
 
 </body>
 </html>
