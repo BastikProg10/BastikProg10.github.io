@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Главная — BastikApp</title>
+  <title>BastikApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -14,14 +14,26 @@
     body {
       margin: 0;
       padding: 0;
-      background: #ffffff;
+      background: #000;
+      color: #FFD700;
       font-family: 'Montserrat', sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      border: 5px solid black;
-      position: relative;
       overflow: hidden;
+    }
+
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
     }
 
     .main {
@@ -30,104 +42,92 @@
       justify-content: center;
       align-items: center;
       position: relative;
+      flex-direction: column;
+      display: none;
     }
 
     .coin {
       width: 130px;
       height: 130px;
       background: url('https://i.imgur.com/FoEtG5b.png') no-repeat center/cover;
-      margin-bottom: 20px;
     }
 
-    .balance {
-      position: absolute;
-      bottom: 140px;
-      font-size: 24px;
-      font-weight: bold;
-      color: black;
-      text-align: center;
-    }
-
-    .side-buttons {
-      position: absolute;
-      top: 60px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      font-size: 14px;
-      color: #333;
-      text-align: center;
-    }
-
-    .left {
-      left: 15px;
-      align-items: center;
-    }
-
-    .right {
-      right: 15px;
-      align-items: center;
-    }
-
-    .side-buttons img {
-      width: 36px;
-      height: 36px;
-      margin-bottom: 4px;
+    .balance-img {
+      width: 150px;
+      margin-top: 15px;
     }
 
     .bottom-bar {
       display: flex;
-      justify-content: space-between;
-      padding: 10px 30px;
-      border-top: 1px solid #ccc;
-      font-size: 16px;
+      justify-content: space-around;
+      padding: 10px 0;
+      font-size: 12px;
+      background: #111;
+      border-top: 2px solid #FFD700;
     }
 
-    .bottom-bar span {
+    .bottom-bar a {
+      text-decoration: none;
+      color: #FFD700;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 6px;
-      color: #333;
+      font-weight: bold;
     }
 
     .bottom-bar img {
-      width: 20px;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 5px;
+    }
+
+    a:hover {
+      color: #ffc400;
     }
   </style>
 </head>
 <body>
 
-  <div class="main">
-    <div class="side-buttons left">
-      <div>
-        <img src="https://i.imgur.com/3cNRG7E.png" alt="Магазин">
-        <div>Магазин</div>
-      </div>
-      <div>
-        <img src="https://i.imgur.com/MdfWYjF.png" alt="Бонус">
-        <div>Бонус</div>
-      </div>
-    </div>
+  <!-- Загрузка -->
+  <div class="loader" id="loader">
+    <img src="https://i.gifer.com/YCZH.gif" alt="Загрузка..." width="100">
+  </div>
 
+  <!-- Основной экран -->
+  <div class="main" id="main">
     <div class="coin"></div>
-    <div class="balance">Баланс: <b>11</b> 🪙</div>
-
-    <div class="side-buttons right">
-      <div>
-        <img src="https://i.imgur.com/yRSfbmn.png" alt="Задания">
-        <div>Задания</div>
-      </div>
-      <div>
-        <img src="https://i.imgur.com/vjVX3KY.png" alt="Колесо">
-        <div>Колесо<br>Удачи</div>
-      </div>
-    </div>
+    <img src="https://i.imgur.com/smFLAjd.png" alt="Баланс: 11 🪙" class="balance-img">
   </div>
 
   <div class="bottom-bar">
-    <span><img src="https://i.imgur.com/OBU40kW.png">Меню</span>
-    <span><img src="https://i.imgur.com/98gEwZ8.png">Профиль</span>
+    <a href="/shop">
+      <img src="https://i.imgur.com/3cNRG7E.png" alt="Магазин">
+      Магазин
+    </a>
+    <a href="/profile">
+      <img src="https://i.imgur.com/98gEwZ8.png" alt="Профиль">
+      Профиль
+    </a>
+    <a href="/bonus">
+      <img src="https://i.imgur.com/MdfWYjF.png" alt="Бонус">
+      Бонус
+    </a>
+    <a href="/tasks">
+      <img src="https://i.imgur.com/yRSfbmn.png" alt="Задания">
+      Задания
+    </a>
+    <a href="/wheel">
+      <img src="https://i.imgur.com/vjVX3KY.png" alt="Удача">
+      Удача
+    </a>
   </div>
+
+  <script>
+    setTimeout(() => {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('main').style.display = 'flex';
+    }, 3000);
+  </script>
 
 </body>
 </html>
